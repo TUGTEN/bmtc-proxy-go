@@ -1,0 +1,63 @@
+package main
+
+import (
+	"io"
+	"log"
+	"net/http"
+
+	"github.com/rs/cors"
+)
+
+func main() {
+	mux := http.NewServeMux()
+
+	// c := cache.New(5*time.Second, 30*time.Second)
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+
+		url := "https://bmtcmobileapi.karnataka.gov.in" + r.URL.Path
+
+		req, err := http.NewRequest(r.Method, url, r.Body)
+
+		if err != nil {
+			return
+		}
+
+		for name, headers := range r.Header {
+			for _, h := range headers {
+				req.Header.Add(name, h)
+			}
+		}
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return
+		}
+
+		defer resp.Body.Close()
+
+		for name, headers := range resp.Header {
+			for _, h := range headers {
+				w.Header().Add(name, h)
+			}
+		}
+
+		w.WriteHeader(resp.StatusCode)
+
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
+		w.Write(bodyBytes)
+
+	})
+
+	corsMux := cors.AllowAll().Handler(mux)
+
+	port := "5000"
+
+	println("Server Listening on port: ", port)
+
+	log.Fatal(http.ListenAndServe(":"+port, corsMux))
+
+}
