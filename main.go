@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/rs/cors"
 )
@@ -17,9 +20,23 @@ func main() {
 
 		url := "https://bmtcmobileapi.karnataka.gov.in" + r.URL.Path
 
-		req, err := http.NewRequest(r.Method, url, r.Body)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		start := time.Now()
+
+		fmt.Println(
+			url,
+		)
+		defer func() {
+			fmt.Println(
+				r.URL.Path, time.Since(start).Milliseconds(), "ms",
+			)
+			defer cancel()
+		}()
+
+		req, err := http.NewRequestWithContext(ctx, r.Method, url, r.Body)
 
 		if err != nil {
+			fmt.Println(err.Error())
 			return
 		}
 
@@ -31,6 +48,7 @@ func main() {
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
+			fmt.Println(err.Error())
 			return
 		}
 
@@ -46,6 +64,7 @@ func main() {
 
 		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
+			fmt.Println(err.Error())
 			return
 		}
 		w.Write(bodyBytes)
