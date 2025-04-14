@@ -1,8 +1,5 @@
 module github.com/TUGTEN/bmtc-proxy-go
 
-go 1.24.1
+go 1.24.0
 
-require (
-	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
-	github.com/rs/cors v1.11.1 // indirect
-)
+require github.com/rs/cors v1.11.1
