@@ -58,6 +58,6 @@ func main() {
 
 	println("Server Listening on port: ", port)
 
-	log.Fatal(http.ListenAndServe(":"+port, corsMux))
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, corsMux))
 
 }
